@@ -4,11 +4,6 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
-        {/* Prevent zoom and enable full-bleed safe-area on all devices */}
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
-        />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#0a0a0a" />
         {/* iOS PWA — Safari uses apple-touch-icon for the home screen, not manifest icons */}
