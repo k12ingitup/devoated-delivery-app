@@ -118,6 +118,15 @@ async function uploadStrip(dataUrl) {
   }
 }
 
+// iPadOS 13+ reports as "Macintosh" in the UA — check maxTouchPoints to detect it
+function isiOS() {
+  if (typeof navigator === 'undefined') return false
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  )
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function PhotoBooth() {
@@ -235,10 +244,22 @@ export default function PhotoBooth() {
 
   const handleDownload = useCallback(() => {
     if (!stripUrl) return
-    const a = document.createElement('a')
-    a.href = stripUrl
-    a.download = `photo-strip-${Date.now()}.jpg`
-    a.click()
+    if (isiOS()) {
+      // iOS Safari silently ignores <a download> on data URLs.
+      // Open in a new tab so the user can long-press → Save to Photos.
+      const w = window.open('', '_blank')
+      w.document.write(
+        `<html><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh">` +
+        `<img src="${stripUrl}" style="max-width:100%;max-height:100vh">` +
+        `</body></html>`
+      )
+      w.document.close()
+    } else {
+      const a = document.createElement('a')
+      a.href = stripUrl
+      a.download = `photo-strip-${Date.now()}.jpg`
+      a.click()
+    }
   }, [stripUrl])
 
   useEffect(() => () => clearResetTimer(), [])
@@ -308,9 +329,20 @@ export default function PhotoBooth() {
             audio={false}
             screenshotFormat="image/jpeg"
             mirrored
-            videoConstraints={{ facingMode: 'user', width: 1280, height: 960 }}
+            playsInline   // required on iOS to prevent the video hijacking fullscreen
+            videoConstraints={{
+              facingMode: 'user',
+              // Use ideal (not exact) — iOS Safari rejects exact constraints and errors out
+              width: { ideal: 1280 },
+              height: { ideal: 960 },
+            }}
             onUserMediaError={() => setCamError(true)}
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+            style={{
+              position: 'absolute',
+              top: 0, left: 0, right: 0, bottom: 0, // inset:0 shorthand not on iOS <14
+              width: '100%', height: '100%',
+              objectFit: 'cover',
+            }}
           />
         )}
 
@@ -354,11 +386,13 @@ export default function PhotoBooth() {
             overflow: hidden; background: #000;
           }
           .flash {
-            position: absolute; inset: 0;
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
             background: white; z-index: 20; pointer-events: none;
           }
           .hud {
-            position: absolute; inset: 0;
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
             display: flex; align-items: center; justify-content: center;
             z-index: 10; pointer-events: none;
           }
@@ -418,7 +452,8 @@ export default function PhotoBooth() {
             display: flex; align-items: center; justify-content: center;
           }
           .cam-error {
-            position: absolute; inset: 0;
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             gap: 16px; color: #f5f0e8;
           }
