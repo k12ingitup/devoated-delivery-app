@@ -1,0 +1,60 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #__next {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0a0a0a;
+  color: #f5f0e8;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ── Print styles ──────────────────────────────────────────────────────────────
+   Hide everything except #print-strip when window.print() is called.
+   Uses the visibility trick so the element can override hidden ancestors.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+#print-strip {
+  display: none;
+}
+
+@page {
+  size: auto;
+  margin: 8mm;
+}
+
+@media print {
+  html, body {
+    width: 100%; height: 100%;
+    overflow: visible;
+    background: white;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #print-strip {
+    display: flex !important;
+    visibility: visible;
+    position: fixed;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    background: white;
+  }
+
+  #print-strip img {
+    visibility: visible;
+    max-height: 100vh;
+    max-width: 100vw;
+    object-fit: contain;
+  }
+}
