@@ -53,10 +53,12 @@ function loadImage(src) {
 
 async function buildStripCanvas(photos, filterCss = 'none') {
   const totalH = HEADER_H + PHOTO_COUNT * PHOTO_H + (PHOTO_COUNT - 1) * GAP + FOOTER_H
+  const SCALE = 2  // render at 2x — makes text and logo crisp at print resolution
   const canvas = document.createElement('canvas')
-  canvas.width  = STRIP_W
-  canvas.height = totalH
+  canvas.width  = STRIP_W * SCALE
+  canvas.height = totalH  * SCALE
   const ctx = canvas.getContext('2d')
+  ctx.scale(SCALE, SCALE)  // all coordinates stay the same; pixels are doubled
 
   // White base
   ctx.fillStyle = '#ffffff'
