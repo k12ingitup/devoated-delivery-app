@@ -10,12 +10,12 @@ const PHOTO_COUNT    = 4
 const COUNTDOWN_FROM = 3
 const AUTO_RESET_MS  = 30_000
 
-// Strip canvas dimensions
-const STRIP_W  = 360
-const PHOTO_H  = 270
-const GAP      = 8
-const HEADER_H = 124
-const FOOTER_H = 60
+// Strip canvas dimensions — 600px wide = 2" at 300 DPI (print quality)
+const STRIP_W  = 600
+const PHOTO_H  = 450   // 4:3 ratio at 600px wide
+const GAP      = 12
+const HEADER_H = 190
+const FOOTER_H = 96
 
 const FILTERS = [
   { id: 'none',    label: 'Original', css: 'none' },
@@ -67,30 +67,30 @@ async function buildStripCanvas(photos, filterCss = 'none') {
   ctx.fillRect(0, 0, STRIP_W, HEADER_H)
 
   // Logo — skipped gracefully if file is missing
-  let logoBottom = 8
+  let logoBottom = 14
   try {
     const logo = await loadImage('/logo.png')
-    const maxH = 52, maxW = STRIP_W - 48
+    const maxH = 86, maxW = STRIP_W - 80
     const scale = Math.min(maxW / logo.width, maxH / logo.height)
     const lw = logo.width * scale
     const lh = logo.height * scale
-    ctx.drawImage(logo, (STRIP_W - lw) / 2, 8, lw, lh)
-    logoBottom = 8 + lh + 6
-  } catch { logoBottom = 14 }
+    ctx.drawImage(logo, (STRIP_W - lw) / 2, 14, lw, lh)
+    logoBottom = 14 + lh + 10
+  } catch { logoBottom = 20 }
 
   ctx.textAlign = 'center'
   ctx.fillStyle = '#f8f1d6'
-  ctx.font = 'italic 600 20px "Playfair Display", Georgia, serif'
-  ctx.fillText(COUPLE_NAMES, STRIP_W / 2, logoBottom + 20)
+  ctx.font = 'italic 600 34px "Playfair Display", Georgia, serif'
+  ctx.fillText(COUPLE_NAMES, STRIP_W / 2, logoBottom + 34)
 
   ctx.fillStyle = 'rgba(248,241,214,0.65)'
-  ctx.font = '400 12px Georgia, serif'
-  ctx.fillText(WEDDING_DATE, STRIP_W / 2, logoBottom + 38)
+  ctx.font = '400 20px Georgia, serif'
+  ctx.fillText(WEDDING_DATE, STRIP_W / 2, logoBottom + 62)
 
   ctx.strokeStyle = 'rgba(248,241,214,0.2)'
-  ctx.lineWidth = 1
+  ctx.lineWidth = 1.5
   ctx.beginPath()
-  ctx.moveTo(24, HEADER_H - 10); ctx.lineTo(STRIP_W - 24, HEADER_H - 10)
+  ctx.moveTo(40, HEADER_H - 16); ctx.lineTo(STRIP_W - 40, HEADER_H - 16)
   ctx.stroke()
 
   // Photos with optional canvas filter (Chrome 76+ / Safari 18+)
@@ -114,8 +114,8 @@ async function buildStripCanvas(photos, filterCss = 'none') {
   ctx.fillRect(0, fy, STRIP_W, FOOTER_H)
   ctx.textAlign = 'center'
   ctx.fillStyle = '#f8f1d6'
-  ctx.font = 'italic 400 15px "Playfair Display", Georgia, serif'
-  ctx.fillText('♥  with love  ♥', STRIP_W / 2, fy + 36)
+  ctx.font = 'italic 400 26px "Playfair Display", Georgia, serif'
+  ctx.fillText('♥  with love  ♥', STRIP_W / 2, fy + 58)
 
   return canvas
 }
@@ -199,7 +199,7 @@ export default function PhotoBooth() {
       setCountdown(0)
       await sleep(200)
       setFlash(true)
-      const src = webcamRef.current?.getScreenshot({ width: 1280, height: 960 }) ?? null
+      const src = webcamRef.current?.getScreenshot({ width: 3840, height: 2880 }) ?? null
       await sleep(220)
       setFlash(false)
       const updated = [...capturedRef.current, src]
@@ -211,7 +211,7 @@ export default function PhotoBooth() {
     setCountdown(null)
     setPhase('building')
     const canvas = await buildStripCanvas(capturedRef.current, filter.css)
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.92)
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.96)
     if (cancelRef.current) return
     setStripUrl(dataUrl)
     setPhase('review')
@@ -335,7 +335,7 @@ export default function PhotoBooth() {
             screenshotFormat="image/jpeg"
             mirrored
             playsInline
-            videoConstraints={{ facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } }}
+            videoConstraints={{ facingMode: 'user', width: { ideal: 3840 }, height: { ideal: 2880 } }}
             onUserMediaError={() => setCamError(true)}
             style={{
               position: 'absolute',

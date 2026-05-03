@@ -44,8 +44,8 @@ body {
 }
 
 @page {
-  size: auto;
-  margin: 8mm;
+  size: 2in 7in;
+  margin: 0;
 }
 
 @media print {
